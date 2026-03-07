@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="../../../../Users/Fernando/source/repos/ScriptHost/ScriptHost.vcxproj" Id="8ce792da-f6ae-78cb-34f1-5b6a540ad456" />
+  <Project Path="ScriptHost5.vcxproj" />
+</Solution>

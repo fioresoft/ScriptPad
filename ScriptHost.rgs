@@ -1,0 +1,26 @@
+HKCR
+{
+	no5irc.no5ircobj.2 = s 'No5IrcObj class'
+	{
+		CLSID = s '{0dba6130-ba55-4119-ad12-66f0d5392379}'
+	}
+	no5irc.no5ircobj = s 'No5IrcObj class'
+	{		
+		CurVer = s 'no5irc.no5ircobj.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {0dba6130-ba55-4119-ad12-66f0d5392379} = s 'No5IrcObj class'
+		{
+			ProgID = s 'no5irc.no5ircobj.1'
+			VersionIndependentProgID = s 'no5irc.no5ircobj'
+			ForceRemove Programmable
+			LocalServer32 = s '%MODULE%'
+			{
+				val ServerExecutable = s '%MODULE_RAW%'
+			}
+			TypeLib = s '{4E40C3E9-CCF8-4451-BC7E-8B66E7D522D0}'
+			Version = s '1.0'
+		}
+	}
+}

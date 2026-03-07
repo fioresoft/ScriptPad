@@ -1,0 +1,46 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(96B11D43-4409-469C-ACCE-A2E4074AD686),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IScriptHostApp: IDispatch
+{
+	[id(1)] HRESULT Output([in] BSTR msg);
+	[id(2)] HRESULT SetTimer([in] LONG id, [in] LONG ms, [out, retval] LONG * res);
+	[id(3)] HRESULT Box([in] BSTR msg);
+	[id(4)] HRESULT Beep([in] LONG ms, [in] LONG freq);
+};
+
+[
+	uuid(2C6653D2-DC1D-435F-A047-5D61F7B4E39C),
+	version(1.1),
+	helpstring("ScriptHost 1.0 Type Library")
+]
+library ScriptHost
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+	[
+		uuid(A186D01D-FA60-40F9-AC63-425F713E5980)
+	]
+	dispinterface _IScriptHostAppEvents
+	{
+		properties:
+		methods:
+			[id(1)] HRESULT OnTimer([in] LONG timerid);
+	};
+	[
+		uuid(831C4BE7-DD20-4B01-85D6-557E58FF3955)
+	]
+	coclass ScriptHostApp
+	{
+		[default] interface IScriptHostApp;
+		[default, source] dispinterface _IScriptHostAppEvents;
+	};
+};
+import "shobjidl.idl";

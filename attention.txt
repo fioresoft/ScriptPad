@@ -1,0 +1,2 @@
+em WinMain não esquecer de passar o LIBID para _Module.init
+hRes = _Module.Init(NULL, hInstance,&LIBID_ScriptHost);
