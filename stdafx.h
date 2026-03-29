@@ -13,13 +13,15 @@
 #include <Windows.h>
 #include <atlbase.h>
 #include <atlapp.h>
+#include <atlmisc.h>
 
 extern CAppModule _Module;
 
 #include <atlwin.h>
 #include <atlctrls.h>
 #include <atlctrlw.h>
-#include <atlsplit.h>
+#include <atlctrlx.h>
+#include <atlsplit2.h>
 #include <string>
 #include <strstream>
 #include <sstream>

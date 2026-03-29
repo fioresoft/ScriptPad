@@ -5,25 +5,14 @@
 #include <atlwin.h>
 #include <atlstr.h>
 #include <string>
-#include "Scintilla.h"
-#include "SciLexer.h"
-#include "ILexer.h"
-#include "Lexilla.h"
-#include "setvbscriptlexer.h"
-#include "utf8.h"   
 #include <WinFile.h>
 #include <DataBuffer.h>
 #include <atlpath.h>
+#include "Scintilla.h"
+#include "SciLexer.h"
+#include "utf8.h"   
 
-#define SH_FILTER _T("vbscript\0*.vbs\0jscript\0*.js\0python script\0*.pys\0python\0*.py\0all files\0*.*\0\0")
 
-
-/*
-void SetVbScriptLexer(HWND hSci) {
-    ILexer5* pLexer = CreateLexer("vbscript");
-    SendMessage(hSci, SCI_SETILEXER, 0, (sptr_t)pLexer);
-}
-*/
 extern CAppModule _Module;
 class CMainFrame;
 
@@ -37,7 +26,7 @@ public:
 		COMMAND_ID_HANDLER(ID_FILE_SAVE, OnFileSave)
 		COMMAND_ID_HANDLER(ID_FILE_SAVE_AS, OnFileSaveAs)
 		COMMAND_ID_HANDLER(ID_FILE_OPEN, OnFileOpen)
-		COMMAND_ID_HANDLER(ID_FILE_NEW, OnFileNew)
+		//COMMAND_ID_HANDLER(ID_FILE_NEW, OnFileNew)
 		COMMAND_CODE_HANDLER(EN_CHANGE, OnEditChange)
 	END_MSG_MAP()
 public:
@@ -147,7 +136,7 @@ public:
 			if (res) {
 				NO5TL::CDataBuffer<char> db;
 
-				res = wf.ReadAll<char>(db, 0);
+				res = wf.ReadAll<char>(db);
 				if (res) {
 					db.AddNull();
 					TEdit* pEdit = (TEdit*)this;
@@ -180,36 +169,6 @@ public:
 			m_bDirty = false;
 		return 0;
 	}
-	LRESULT OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-	{
-		TEdit* pEdit = (TEdit*)this;
-		BOOL res = TRUE;
-		int choice;
-
-		if (m_bDirty && pEdit->GetWindowTextLength()) {
-			CString question;
-			question.LoadStringW(IDS_SAVE);
-			if (IDYES == (choice = pEdit->MessageBox(question, NULL, MB_YESNOCANCEL))) {
-				CString path = m_path;
-				if (path.IsEmpty()) {
-					OnFileSaveAs(0, 0, 0, res);
-				}
-				else {
-					OnFileSave(0, 0, 0, res);
-				}
-				pEdit->SetWindowText(_T(""));
-				m_path.m_strPath = _T("");
-				m_pFrame->SetPath(m_path);
-			}
-			else if (choice == IDNO) {
-				pEdit->SetWindowText(_T(""));
-			}
-
-		}
-		else
-			pEdit->SetWindowText(_T(""));
-		return 0;
-	}
 	LRESULT OnEditChange(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	{
 		m_bDirty = true;
@@ -236,11 +195,11 @@ public:
 
     BEGIN_MSG_MAP(EditorWindow)
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
-        MESSAGE_HANDLER(WM_NOTIFY, OnNotify)
         MESSAGE_HANDLER(WM_KEYDOWN, OnKeyDown)
 		MESSAGE_HANDLER(WM_DESTROY,OnDestroy)
-		CHAIN_MSG_MAP_ALT(CEditCommands<EditorWindow>, 1)
-		CHAIN_MSG_MAP_ALT(CEditFileCommands<EditorWindow>,2)
+		MESSAGE_HANDLER(WM_NOTIFY,OnSciNotify)
+		CHAIN_COMMANDS_ALT(CEditCommands<EditorWindow>, 1)
+		CHAIN_COMMANDS_ALT(CEditFileCommands<EditorWindow>,2)
     END_MSG_MAP()
 
 	LRESULT OnCreate(UINT, WPARAM, LPARAM, BOOL& bHandled) {
@@ -281,24 +240,22 @@ public:
         }
         return list;
     }
-	std::string BuildAutoListJScript(const char* prefix) {
-		const char* words =
-			"break case catch continue debugger default delete do else finally for "
-			"function if in instanceof new return switch this throw try typeof var "
-			"void while with true false null undefined";
 
+	std::string BuildAutoListJScript(const char* prefix, const char* words) {
 		std::string list;
 		std::istringstream iss(words);
 		std::string w;
 
 		while (iss >> w) {
-			if (w.rfind(prefix, 0) == 0) {
+			if (prefix[0] == '\0' || w.rfind(prefix, 0) == 0) {
 				if (!list.empty()) list += " ";
 				list += w;
 			}
 		}
 		return list;
 	}
+
+
 
 	std::string BuildAutoListPython(const char* prefix) {
 		const char* words =
@@ -331,15 +288,16 @@ public:
 		return 0;
 	}
 
-    LRESULT OnNotify(UINT, WPARAM, LPARAM lParam, BOOL&) {
-        SCNotification* scn = (SCNotification*)lParam;
+	LRESULT OnSciNotify(UINT,WPARAM wParam,LPARAM lParam, BOOL& bHandled)
+	{
+		SCNotification* scn = (SCNotification*)lParam;
 
-        if (scn->nmhdr.hwndFrom == m_hWnd && scn->nmhdr.code == SCN_CHARADDED) {
-            char ch = (char)scn->ch;
-            if (isalnum((unsigned char)ch))
-                ShowAutoComplete();
-        }
-        return 0;
+		if (scn->nmhdr.hwndFrom == m_hWnd && scn->nmhdr.code == SCN_CHARADDED) {
+			char ch = (char)scn->ch;
+			if (isalnum((unsigned char)ch))
+				ShowAutoComplete();
+		}
+		return 0;
     }
 
     LRESULT OnKeyDown(UINT, WPARAM wParam, LPARAM, BOOL& bHandled) {
